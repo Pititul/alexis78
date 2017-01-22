@@ -375,6 +375,7 @@ struct option options[] = {
 	{ "syslog", 0, NULL, 'S' },
 	{ "syslog-prefix", 1, NULL, 1018 },
 #endif
+	{ "shares-limit", 1, NULL, 1009 },
 	{ "time-limit", 1, NULL, 1008 },
 	{ "threads", 1, NULL, 't' },
 	{ "vote", 1, NULL, 1022 },
@@ -1870,6 +1871,36 @@ static void *miner_thread(void *userdata)
 			if (remain < max64) max64 = remain;
 		}
 
+		/* shares limit */
+		if (opt_shares_limit > 0 && firstwork_time) {
+			int64_t shares = (pools[cur_pooln].accepted_count + pools[cur_pooln].rejected_count);
+			if (shares >= opt_shares_limit) {
+				int passed = (int)(time(NULL) - firstwork_time);
+				if (thr_id != 0) {
+					sleep(1); continue;
+				}
+				if (num_pools > 1 && pools[cur_pooln].shares_limit > 0) {
+					if (!pool_is_switching) {
+						if (!opt_quiet)
+							applog(LOG_INFO, "Pool shares limit of %d reached, rotate...", opt_shares_limit);
+						pool_switch_next(thr_id);
+					} else if (passed > 35) {
+						// ensure we dont stay locked if pool_is_switching is not reset...
+						applog(LOG_WARNING, "Pool switch to %d timed out...", cur_pooln);
+						if (!thr_id) pools[cur_pooln].wait_time += 1;
+						pool_is_switching = false;
+					}
+					sleep(1);
+					continue;
+				}
+				abort_flag = true;
+				app_exit_code = EXIT_CODE_OK;
+				applog(LOG_NOTICE, "Mining limit of %d shares reached, exiting...", opt_shares_limit);
+				workio_abort();
+				break;
+			}
+		}
+
 		max64 *= (uint32_t)thr_hashrates[thr_id];
 
 		/* on start, max64 should not be 0,
@@ -3074,6 +3105,9 @@ void parse_arg(int key, char *arg)
 		break;
 	case 1008:
 		opt_time_limit = atoi(arg);
+		break;
+	case 1009:
+		opt_shares_limit = atoi(arg);
 		break;
 	case 1011:
 		allow_gbt = false;
