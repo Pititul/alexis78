@@ -3342,6 +3342,25 @@ static void parse_cmdline(int argc, char *argv[]){
 	}	
 }
 
+static void parse_single_opt(int opt, int argc, char *argv[])
+{
+	int key, prev = optind;
+	while (1) {
+#if HAVE_GETOPT_LONG
+		key = getopt_long(argc, argv, short_options, options, NULL);
+#else
+		key = getopt(argc, argv, short_options);
+#endif
+		if (key < 0)
+			break;
+		if (key == opt /* || key == 'c'*/)
+			parse_arg(key, optarg);
+	}
+	//todo with a filter: parse_config(opt_config);
+
+	optind = prev; // reset argv index
+}
+
 #ifndef WIN32
 static void signal_handler(int sig)
 {
@@ -3393,7 +3412,9 @@ int main(int argc, char *argv[])
 	long flags;
 	int i;
 
-	
+	// get opt_quiet early
+	parse_single_opt('q', argc, argv);
+
 	char comment_toolkit[30];
 	if(((int)(CUDART_VERSION/1000)==7) && ((int)((CUDART_VERSION % 1000)/10)==5))
 		strcpy(comment_toolkit, "Recommended");
@@ -3401,15 +3422,17 @@ int main(int argc, char *argv[])
 		strcpy(comment_toolkit, "Not recommended prefer 7.5");
 		
 	printf("*** " PROGRAM_NAME " " PACKAGE_VERSION " for nVidia GPUs from alexis78@github ***\n");
+	if (!opt_quiet) {
 #ifdef _MSC_VER
-	printf("*** Built with VC++ 2013 and nVidia CUDA SDK %d.%d (%s)\n\n",
+		printf("*** Built with VC++ 2013 and nVidia CUDA SDK %d.%d (%s)\n\n",
 #else
-	printf("*** Built with the nVidia CUDA Toolkit %d.%d (%s)\n\n",
+		printf("*** Built with the nVidia CUDA Toolkit %d.%d (%s)\n\n",
 #endif
-		CUDART_VERSION/1000, (CUDART_VERSION % 1000)/10, comment_toolkit);
-	printf("*** Based on tpruvot@github ccminer\n");
-	printf("*** Originally based on Christian Buchner and Christian H. project\n");
-	printf("*** Include some of the work of djm34, sp, tsiv and klausT.\n\n");
+			CUDART_VERSION/1000, (CUDART_VERSION % 1000)/10, comment_toolkit);
+		printf("*** Based on tpruvot@github ccminer\n");
+		printf("*** Originally based on Christian Buchner and Christian H. project\n");
+		printf("*** Include some of the work of djm34, sp, tsiv and klausT.\n\n");
+	}
 
 	rpc_user = strdup("");
 	rpc_pass = strdup("");
@@ -3652,7 +3675,8 @@ int main(int argc, char *argv[])
 	if (hnvml) {
 		bool gpu_reinit = (opt_cudaschedule >= 0); //false
 		cuda_devicenames(); // refresh gpu vendor name
-		applog(LOG_INFO, "NVML GPU monitoring enabled.");
+		if (!opt_quiet)
+			applog(LOG_INFO, "NVML GPU monitoring enabled.");
 		for (int n=0; n < active_gpus; n++) {
 			if (nvml_set_pstate(device_map[n]) == 1)
 				gpu_reinit = true;
@@ -3674,12 +3698,14 @@ int main(int argc, char *argv[])
 	}
 #ifdef WIN32
 	if (!hnvml && nvapi_init() == 0) {
-		applog(LOG_INFO, "NVAPI GPU monitoring enabled.");
+		if (!opt_quiet)
+			applog(LOG_INFO, "NVAPI GPU monitoring enabled.");
 		cuda_devicenames(); // refresh gpu vendor name
 	}
 #endif
 	else if (!hnvml)
-		applog(LOG_INFO, "GPU monitoring is not available.");
+		if (!opt_quiet)
+			applog(LOG_INFO, "GPU monitoring is not available.");
 #endif
 
 	if (opt_api_listen) {
