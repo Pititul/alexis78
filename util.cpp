@@ -166,9 +166,9 @@ void gpulog(int prio, int thr_id, const char *fmt, ...){
 		return;
 
 	if (gpu_threads > 1)
-		len = snprintf(pfmt, 128, "GPU T%d:%s", thr_id, fmt);
+		len = snprintf(pfmt, 128, "GPU T%d: %s", thr_id, fmt);
 	else
-		len = snprintf(pfmt, 128, "GPU#%d:%s", dev_id, fmt);
+		len = snprintf(pfmt, 128, "GPU#%d: %s", dev_id, fmt);
 	pfmt[sizeof(pfmt)-1]='\0';
 
 	va_start(ap, fmt);
@@ -2148,6 +2148,9 @@ void print_hash_tests(void){
 
 	keccak256_hash(&hash[0], &buf[0]);
 	printpfx("keccak", hash);
+
+	hsr_hash(&hash[0], &buf[0]);
+	printpfx("hsr", hash);
 	
 	lyra2re_hash(&hash[0], &buf[0]);
 	printpfx("lyra2", hash);

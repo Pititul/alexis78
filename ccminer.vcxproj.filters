@@ -249,6 +249,9 @@
     <ClCompile Include="nvapi.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="x13\sm3.c">
+      <Filter>Source Files\CUDA\x13</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="algos.h">
@@ -278,7 +281,7 @@
     <ClInclude Include="compat\stdbool.h">
       <Filter>Header Files\compat</Filter>
     </ClInclude>
-    <ClInclude Include="cpuminer-config.h">
+    <ClInclude Include="compat\cpuminer-config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="uint256.h">
@@ -633,6 +636,12 @@
     </CudaCompile>
     <CudaCompile Include="x15\whirlpool.cu">
       <Filter>Source Files\CUDA\x15</Filter>
+    </CudaCompile>
+    <CudaCompile Include="x13\cuda_hsr_sm3.cu">
+      <Filter>Source Files\CUDA\x13</Filter>
+    </CudaCompile>
+    <CudaCompile Include="x13\hsr.cu">
+      <Filter>Source Files\CUDA\x13</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>

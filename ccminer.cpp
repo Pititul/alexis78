@@ -218,7 +218,8 @@ Options:\n\
   			blakecoin   Blake256-8rounds (BLC)\n\
 			vcash       Blake256-8rounds (XVC)\n\
 			blake2s	    Blake2s          (NEVA/XVG)\n\
-			keccak	    keccak256        (Maxcoin)\n\
+			keccak      keccak256        (Maxcoin)\n\
+			hsr         X13+SM3          (Hshare)\n\
 			lyra2                        (LyraBar)\n\
 			lyra2v2                      (VertCoin)\n\
 			skein       Skein SHA2       (AUR/DGB/SKC)\n\
@@ -1933,6 +1934,7 @@ static void *miner_thread(void *userdata)
 					minmax = 0x80000;
 					break;
 				case ALGO_C11:
+				case ALGO_HSR:
 				case ALGO_X11:
 				case ALGO_X11EVO:
 				case ALGO_X13:
@@ -2057,6 +2059,9 @@ static void *miner_thread(void *userdata)
 				break;
 			case ALGO_C11:
 				rc = scanhash_c11(thr_id, &work, max_nonce, &hashes_done);
+				break;
+			case ALGO_HSR:
+				rc = scanhash_hsr(thr_id, &work, max_nonce, &hashes_done);
 				break;
 			case ALGO_SIB:
 				rc = scanhash_sib(thr_id, &work, max_nonce, &hashes_done);
@@ -2184,10 +2189,12 @@ static void *miner_thread(void *userdata)
 				gpulog(LOG_INFO, thr_id, "%s, %s", device_name[dev_id], s);
 				pthread_mutex_lock(&cgpu->monitor.lock);
 				if (cgpu->monitor.gpu_power != 0){
-					gpulog(LOG_INFO, thr_id, "%s, %1.2gMH/W, %1.2gMH/Mhz", device_name[dev_id], (double)(thr_hashrates[thr_id] / 1.0e6) / (cgpu->monitor.gpu_power / 1000),
-                                                                                               (double)(thr_hashrates[thr_id] / 1.0e6) / (cgpu->monitor.gpu_clock));
-					gpulog(LOG_INFO, thr_id, "%s, %uC(F:%u%%) %u/%uMHz(%uW)", device_name[dev_id], cgpu->monitor.gpu_temp, cgpu->monitor.gpu_fan,cgpu->monitor.gpu_clock,
-					                                                             cgpu->monitor.gpu_memclock,(cgpu->monitor.gpu_power / 1000));
+					gpulog(LOG_INFO, thr_id, "%s, %1.2gMH/W, %1.2gMH/Mhz",
+					device_name[dev_id], (double)(thr_hashrates[thr_id] / 1.0e6) / (cgpu->monitor.gpu_power / 1000),
+						(double)(thr_hashrates[thr_id] / 1.0e6) / (cgpu->monitor.gpu_clock));
+					gpulog(LOG_INFO, thr_id, "%s, %uC(F:%u%%) %u/%uMHz(%uW)",
+						device_name[dev_id], cgpu->monitor.gpu_temp, cgpu->monitor.gpu_fan,cgpu->monitor.gpu_clock,
+						cgpu->monitor.gpu_memclock,(cgpu->monitor.gpu_power / 1000));
 				}
 				pthread_mutex_unlock(&cgpu->monitor.lock);
 			}else

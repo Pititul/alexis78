@@ -48,6 +48,7 @@ void algo_free_all(int thr_id){
 	free_decred(thr_id);
 	free_blake2s(thr_id);
 	free_keccak256(thr_id);
+	free_hsr(thr_id);
 	free_lyra2(thr_id);
 	free_lyra2v2(thr_id);
 //	free_whirlx(thr_id);

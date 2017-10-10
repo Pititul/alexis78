@@ -244,6 +244,7 @@
     <ClCompile Include="util.cpp" />
     <ClCompile Include="bench.cpp" />
     <ClCompile Include="bignum.cpp" />
+    <ClCompile Include="x13\sm3.c" />
     <ClInclude Include="bignum.hpp" />
     <ClCompile Include="hashlog.cpp" />
     <ClCompile Include="stats.cpp" />
@@ -303,7 +304,7 @@
     <ClInclude Include="compat\sys\time.h" />
     <ClInclude Include="compat\unistd.h" />
     <ClInclude Include="compat\winansi.h" />
-    <ClInclude Include="cpuminer-config.h" />
+    <ClInclude Include="compat\cpuminer-config.h" />
     <ClInclude Include="cuda_helper.h" />
     <ClInclude Include="cuda_vector_uint2x4.h" />
     <ClInclude Include="elist.h" />
@@ -409,9 +410,11 @@
     </CudaCompile>
     <CudaCompile Include="x11\x11.cu" />
     <CudaCompile Include="x11\x11evo.cu" />
+    <CudaCompile Include="x13\cuda_hsr_sm3.cu" />
     <CudaCompile Include="x13\cuda_x13_hamsi_fugue512.cu">
       <MaxRegCount>72</MaxRegCount>
     </CudaCompile>
+    <CudaCompile Include="x13\hsr.cu" />
     <CudaCompile Include="x13\x13.cu" />
     <CudaCompile Include="x14\x14.cu" />
     <CudaCompile Include="x14\cuda_x14_shabal512.cu" />
